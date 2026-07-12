@@ -1,6 +1,29 @@
 import requests
 import sys
 
+
+# Headers that matter for security analysis
+SECURITY_HEADERS = [
+    "Strict-Transport-Security",
+    "Content-Security-Policy",
+    "X-Content-Type-Options",
+    "X-Frame-Options",
+    "Referrer-Policy",
+    "Permissions-Policy",
+    "X-XSS-Protection",
+    "Cross-Origin-Opener-Policy",
+    "Cross-Origin-Resource-Policy",
+    "Cross-Origin-Embedder-Policy",
+]
+
+# Headers that can leak info about the server/stack
+INFO_LEAK_HEADERS = [
+    "Server",
+    "X-Powered-By",
+    "X-AspNet-Version",
+    "X-AspNetMvc-Version",
+]
+
 def fetch_headers(url: str) -> dict:
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
@@ -11,7 +34,31 @@ def fetch_headers(url: str) -> dict:
         print(f"Error fetching {url}: {e}")
         sys.exit(1)
 
-    return dict(response.headers)
+    return dict(response.headers), response.status_code, response.url
+
+
+SECURITY_HEADERS_SET = {h.lower() for h in SECURITY_HEADERS}
+INFO_LEAK_HEADERS_SET = {h.lower() for h in INFO_LEAK_HEADERS}
+
+
+def categorize_headers(headers: dict) -> dict:
+    """Split headers into security, info-leak, and other buckets."""
+    result = {
+        "security": {},
+        "info_leak": {},
+        "other": {},
+    }
+
+    for key, value in headers.items():
+        key_lower = key.lower()
+        if key_lower in SECURITY_HEADERS_SET:
+            result["security"][key] = value
+        elif key_lower in INFO_LEAK_HEADERS_SET:
+            result["info_leak"][key] = value
+        else:
+            result["other"][key] = value
+
+    return result
 
 
 def main():
@@ -20,11 +67,29 @@ def main():
         sys.exit(1)
 
     url = sys.argv[1]
-    headers = fetch_headers(url)
+    headers, status_code, final_url = fetch_headers(url)
+    categorized = categorize_headers(headers)
 
-    print(f"\nHeaders for {url}:\n" + "-" * 40)
-    for key, value in headers.items():
-        print(f"{key}: {value}")
+    print(f"\nAnalyzed: {final_url}  (status: {status_code})\n" + "=" * 50)
+
+    print("\n[Security Headers Present]")
+    if categorized["security"]:
+        for k, v in categorized["security"].items():
+            print(f"  {k}: {v}")
+    else:
+        print("  None found")
+
+    print("\n[Info-Leaking Headers]")
+    if categorized["info_leak"]:
+        for k, v in categorized["info_leak"].items():
+            print(f"  {k}: {v}")
+    else:
+        print("  None found")
+
+    print("\n[Other Headers]")
+    for k, v in categorized["other"].items():
+        print(f"  {k}: {v}")
+
 
 
 if __name__ == "__main__":
