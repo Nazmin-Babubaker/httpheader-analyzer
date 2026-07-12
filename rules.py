@@ -59,3 +59,21 @@ SECURITY_HEADER_INFO = {
         "Low",
     ),
 }
+
+MISSING_HEADER_PENALTY = {
+    "High": 20,
+    "Medium": 10,
+    "Low": 0,
+}
+
+MISCONFIGURATION_PENALTY = 15
+
+INFO_LEAK_PENALTY = 3
+
+GRADE_THRESHOLDS = [
+    (90, "A"),
+    (80, "B"),
+    (70, "C"),
+    (60, "D"),
+    (0, "F"),
+]
