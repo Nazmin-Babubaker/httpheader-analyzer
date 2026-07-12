@@ -2,28 +2,6 @@ import requests
 import sys
 
 
-# Headers that matter for security analysis
-SECURITY_HEADERS = [
-    "Strict-Transport-Security",
-    "Content-Security-Policy",
-    "X-Content-Type-Options",
-    "X-Frame-Options",
-    "Referrer-Policy",
-    "Permissions-Policy",
-    "X-XSS-Protection",
-    "Cross-Origin-Opener-Policy",
-    "Cross-Origin-Resource-Policy",
-    "Cross-Origin-Embedder-Policy",
-]
-
-# Headers that can leak info about the server/stack
-INFO_LEAK_HEADERS = [
-    "Server",
-    "X-Powered-By",
-    "X-AspNet-Version",
-    "X-AspNetMvc-Version",
-]
-
 def fetch_headers(url: str) -> dict:
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
