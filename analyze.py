@@ -149,7 +149,6 @@ def main():
 
     url = sys.argv[1]
     headers, status_code, final_url = fetch_headers(url)
-    print(headers)
     categorized = categorize_headers(headers)
 
     issues = check_risky_values(categorized["security"])
