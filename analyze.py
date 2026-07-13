@@ -51,7 +51,6 @@ def fetch_headers(url: str) -> dict:
 
 
 def categorize_headers(headers: dict) -> dict:
-    """Split headers into security, info-leak, and other buckets."""
     result = {
         "security": {},
         "info_leak": {},
@@ -131,7 +130,7 @@ def calculate_score(missing: list, issues: list, info_leak_count: int) -> tuple:
     score -= len(issues) * MISCONFIGURATION_PENALTY
     score -= info_leak_count * INFO_LEAK_PENALTY
 
-    score = max(0, min(100, score))  # clamp between 0 and 100
+    score = max(0, min(100, score))  
 
     grade = "F"
     for threshold, letter in GRADE_THRESHOLDS:
