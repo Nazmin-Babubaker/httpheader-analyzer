@@ -10,15 +10,39 @@ from rules import (
     GRADE_THRESHOLDS,
 )
 
+DEFAULT_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;q=0.9,"
+        "image/avif,image/webp,*/*;q=0.8"
+    ),
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+
 def fetch_headers(url: str) -> dict:
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
 
     try:
-        response = requests.get(url, timeout=10, allow_redirects=True)
+        response = requests.get(
+            url, timeout=10, allow_redirects=True, headers=DEFAULT_HEADERS
+        )
     except requests.exceptions.RequestException as e:
         print(f"Error fetching {url}: {e}")
         sys.exit(1)
+
+    if response.status_code in (403, 429, 503) or "x-waf-block" in {
+        k.lower() for k in response.headers
+    }:
+        print(
+            f"⚠ Warning: got status {response.status_code} — this may be a WAF/"
+            "bot-block or challenge page, not the real site. Header analysis "
+            "below could be inaccurate.\n"
+        )
 
     return dict(response.headers), response.status_code, response.url
 
@@ -125,6 +149,7 @@ def main():
 
     url = sys.argv[1]
     headers, status_code, final_url = fetch_headers(url)
+    print(headers)
     categorized = categorize_headers(headers)
 
     issues = check_risky_values(categorized["security"])

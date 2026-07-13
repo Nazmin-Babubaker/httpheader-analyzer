@@ -40,7 +40,7 @@ SECURITY_HEADER_INFO = {
     ),
     "referrer-policy": (
         "Controls how much referrer info is leaked to other sites when navigating away.",
-        "Low",
+        "Medium",
     ),
     "permissions-policy": (
         "Restricts access to browser features (camera, mic, geolocation, etc.).",
@@ -61,19 +61,19 @@ SECURITY_HEADER_INFO = {
 }
 
 MISSING_HEADER_PENALTY = {
-    "High": 20,
-    "Medium": 10,
-    "Low": 0,
+    "High": 10,
+    "Medium": 5,
+    "Low": 1,
 }
+MISCONFIGURATION_PENALTY = 10
 
-MISCONFIGURATION_PENALTY = 15
-
-INFO_LEAK_PENALTY = 3
+INFO_LEAK_PENALTY = 2
 
 GRADE_THRESHOLDS = [
-    (90, "A"),
-    (80, "B"),
-    (70, "C"),
-    (60, "D"),
+    (90, "A+"),
+    (80, "A"),
+    (70, "B"),
+    (60, "C"),
+    (50, "D"),
     (0, "F"),
 ]
